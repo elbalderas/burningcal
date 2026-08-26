@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Burning Man Calendar</title>
+<meta name="description" content="Subscribe to the Burning Man calendar — sets and events on playa.">
+<!-- Unlisted by intent: this is shared with a friend group, not broadcast. -->
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 56'%3E%3Cg fill='none' stroke='%233B82F6' stroke-width='4' stroke-linecap='round'%3E%3Ccircle cx='24' cy='9' r='5'/%3E%3Cpath d='M24 15v18M24 20L9 7M24 20l15-13M24 33L13 51M24 33l11 18'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --bg:      #0a0a0f;
+    --text:    #f2f2f7;
+    --muted:   #9b9baa;
+    --line:    rgba(255,255,255,.09);
+    --surface: rgba(255,255,255,.035);
+    --purple:  #8B5CF6;
+    --blue:    #3B82F6;
+    --teal:    #14B8A6;
+    --grad: linear-gradient(100deg, var(--purple), var(--blue) 55%, var(--teal));
+  }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
+    font: 400 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Ambient wash. The palette lives here and on the button, so the rest of
+     the page can stay quiet. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -25%;
+    z-index: -1;
+    background:
+      radial-gradient(circle at 22% 18%, rgba(139,92,246,.38), transparent 45%),
+      radial-gradient(circle at 80% 28%, rgba(59,130,246,.32), transparent 45%),
+      radial-gradient(circle at 50% 88%, rgba(20,184,166,.30), transparent 48%);
+    filter: blur(70px);
+  }
+
+  .card {
+    width: min(100%, 440px);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 40px 32px 28px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 24px 70px rgba(0,0,0,.55);
+  }
+
+  .mark { width: 46px; height: 54px; display: block; margin: 0 auto 20px; }
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 27px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+  }
+
+  .tagline { margin: 0 0 28px; color: var(--muted); font-size: 14.5px; }
+
+  .primary {
+    display: block;
+    padding: 15px 20px;
+    border-radius: 14px;
+    background: var(--grad);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(59,130,246,.32);
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .primary:hover { transform: translateY(-1px); filter: brightness(1.07); box-shadow: 0 12px 30px rgba(59,130,246,.42); }
+  .primary:active { transform: translateY(0); }
+
+  .hint { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); }
+
+  .or {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 14px;
+    color: var(--muted);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+  }
+  .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  .url-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 5px 5px 13px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    text-align: left;
+  }
+
+  .url-row code {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    color: #c6c6d6;
+    scrollbar-width: none;
+  }
+  .url-row code::-webkit-scrollbar { display: none; }
+
+  #copy {
+    flex: none;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  #copy:hover { background: rgba(255,255,255,.11); }
+  #copy[data-done="1"] { background: rgba(20,184,166,.18); color: var(--teal); border-color: rgba(20,184,166,.4); }
+
+  .instructions { margin: 12px 0 0; font-size: 13px; color: var(--muted); text-align: left; }
+  .instructions b { color: #d4d4e0; font-weight: 500; }
+
+  .note {
+    margin: 26px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 420px) {
+    .card { padding: 32px 22px 24px; border-radius: 20px; }
+    h1 { font-size: 24px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .primary { transition: none; }
+    .primary:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<main class="card">
+  <svg class="mark" viewBox="0 0 48 56" role="img" aria-label="The Man">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"   stop-color="#8B5CF6"/>
+        <stop offset="55%"  stop-color="#3B82F6"/>
+        <stop offset="100%" stop-color="#14B8A6"/>
+      </linearGradient>
+    </defs>
+    <g fill="none" stroke="url(#g)" stroke-width="3.4" stroke-linecap="round">
+      <circle cx="24" cy="9" r="5.2"/>
+      <path d="M24 15.2V33"/>
+      <path d="M24 20.5L9.5 7"/>
+      <path d="M24 20.5L38.5 7"/>
+      <path d="M24 33L13 51.5"/>
+      <path d="M24 33l11 18.5"/>
+    </g>
+  </svg>
+
+  <h1>Burning Man</h1>
+  <p class="tagline">Sets and events on playa. Times are Pacific.</p>
+
+  <a class="primary" href="webcal://raw.githubusercontent.com/elbalderas/burningcal/refs/heads/main/calendar.ics">Add to Calendar</a>
+  <p class="hint">Opens your calendar app and subscribes.</p>
+
+  <div class="or">or</div>
+
+  <div class="url-row">
+    <code id="url">https://raw.githubusercontent.com/elbalderas/burningcal/refs/heads/main/calendar.ics</code>
+    <button id="copy" type="button" aria-live="polite">Copy</button>
+  </div>
+
+  <p class="instructions">Google Calendar: <b>Other calendars → From URL</b> on desktop or Android.</p>
+
+  <p class="note">Subscribed calendars refresh on their own schedule — usually a few hours, not instantly. New events won't show up the moment they're added.</p>
+</main>
+
+<script>
+  const btn = document.getElementById("copy");
+  const url = document.getElementById("url").textContent.trim();
+
+  btn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Older browsers, and any context the async clipboard API is blocked in.
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch {}
+      ta.remove();
+    }
+    btn.textContent = "Copied";
+    btn.dataset.done = "1";
+    setTimeout(() => { btn.textContent = "Copy"; delete btn.dataset.done; }, 1800);
+  });
+</script>
+
+</body>
+</html>
