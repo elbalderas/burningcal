@@ -62,14 +62,14 @@
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 24px;
-    padding: 40px 32px 28px;
+    padding: 36px 30px 24px;
     text-align: center;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 24px 70px rgba(0,0,0,.55);
   }
 
-  .mark { width: 37.5px; height: 58px; display: block; margin: 0 auto 22px; }
+  .mark { width: 37.5px; height: 58px; display: block; margin: 0 auto 18px; }
 
   h1 {
     margin: 0 0 6px;
@@ -78,30 +78,82 @@
     letter-spacing: -.02em;
   }
 
-  .tagline { margin: 0 0 28px; color: var(--muted); font-size: 14.5px; }
+  .tagline { margin: 0 0 22px; color: var(--muted); font-size: 14.5px; }
 
-  .primary {
+  .btn {
     display: block;
     padding: 15px 20px;
     border-radius: 14px;
-    background: var(--grad);
-    color: #fff;
     font-size: 16px;
     font-weight: 600;
     text-decoration: none;
-    box-shadow: 0 8px 24px rgba(59,130,246,.32);
     transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
   }
-  .primary:hover { transform: translateY(-1px); filter: brightness(1.07); box-shadow: 0 12px 30px rgba(59,130,246,.42); }
-  .primary:active { transform: translateY(0); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary {
+    background: var(--grad);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(59,130,246,.32);
+  }
+  .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.07); box-shadow: 0 12px 30px rgba(59,130,246,.42); }
+
+  /* The second path is equally valid, so it reads as a peer of the first --
+     but the gradient stays on one button so the card keeps a single focus. */
+  .btn-android {
+    margin-top: 16px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.16);
+    color: var(--text);
+    /* 14px, not the primary's 16: it keeps the longest sensible label on one
+       line at 375px, and the step down reads as secondary without hiding it. */
+    font-size: 14px;
+  }
+  .btn-android:hover { transform: translateY(-1px); background: rgba(255,255,255,.09); }
 
   .hint { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); }
+
+  /* A real sequence, so it is numbered. */
+  .steps {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+    text-align: left;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .steps li {
+    counter-increment: step;
+    display: flex;
+    gap: 8px;
+  }
+  .steps li + li { margin-top: 4px; }
+  .steps li::before {
+    content: counter(step);
+    flex: none;
+    width: 15px;
+    height: 15px;
+    margin-top: 2px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    color: #cfcfdd;
+    font-size: 9.5px;
+    font-weight: 600;
+    line-height: 15px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .steps b { color: #d4d4e0; font-weight: 500; }
+
+  .warn { margin: 9px 0 0; font-size: 12px; color: #b9a48d; text-align: left; }
 
   .or {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin: 24px 0 14px;
+    margin: 18px 0 12px;
     color: var(--muted);
     font-size: 11.5px;
     text-transform: uppercase;
@@ -151,9 +203,12 @@
   .instructions { margin: 12px 0 0; font-size: 13px; color: var(--muted); text-align: left; }
   .instructions b { color: #d4d4e0; font-weight: 500; }
 
+  .foot { margin: 9px 0 0; font-size: 11.5px; line-height: 1.5; color: #82828f; }
+  .foot b { color: #a0a0b0; font-weight: 500; }
+
   .note {
-    margin: 26px 0 0;
-    padding-top: 18px;
+    margin: 20px 0 0;
+    padding-top: 15px;
     border-top: 1px solid var(--line);
     font-size: 12.5px;
     line-height: 1.55;
@@ -166,7 +221,7 @@
   }
 
   @media (max-width: 420px) {
-    .card { padding: 32px 22px 24px; border-radius: 20px; }
+    .card { padding: 28px 20px 22px; border-radius: 20px; }
     h1 { font-size: 24px; }
   }
 
@@ -204,8 +259,25 @@
   <h1>Burning Man</h1>
   <p class="tagline">Sets and events on playa. Times are Pacific.</p>
 
-  <a class="primary" href="webcal://raw.githubusercontent.com/elbalderas/burningcal/refs/heads/main/calendar.ics">Add to Calendar</a>
-  <p class="hint">Opens your calendar app and subscribes.</p>
+  <a class="btn btn-primary" href="webcal://raw.githubusercontent.com/elbalderas/burningcal/refs/heads/main/calendar.ics">Add to Calendar</a>
+  <p class="hint">iPhone, iPad or Mac — opens your calendar app.</p>
+
+  <!-- Android has no webcal:// handler, and the Google Calendar app cannot add a
+       calendar by URL at all -- only the web version can. A real link with
+       target=_blank rather than window.open(): the clipboard write below is
+       async, so opening the tab after awaiting it would fall outside the user
+       gesture and be caught by the popup blocker. -->
+  <a class="btn btn-android" id="android"
+     href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer">
+    Copy &amp; open Google Calendar
+  </a>
+  <p class="hint" id="android-hint" aria-live="polite">Android — the Google Calendar app can’t add a calendar by URL, so this opens the web version.</p>
+
+  <ol class="steps">
+    <li><b>Other calendars</b> → <b>+</b> → <b>From URL</b></li>
+    <li>Paste the link (already copied) → <b>Add calendar</b></li>
+  </ol>
+  <p class="warn">Google Calendar can take up to 24 hours to show updates.</p>
 
   <div class="or">or</div>
 
@@ -214,32 +286,67 @@
     <button id="copy" type="button" aria-live="polite">Copy</button>
   </div>
 
-  <p class="instructions">Google Calendar: <b>Other calendars → From URL</b> on desktop or Android.</p>
+  <p class="instructions">Any other calendar app: add a calendar <b>by URL</b> and paste this.</p>
 
   <p class="note">Subscribed calendars auto-refresh on their own schedule — usually a few hours, not instantly.</p>
+  <p class="foot">On Android and want updates sooner? <b>ICSx⁵</b> subscribes to webcal:// links directly, but it is a separate app to install.</p>
 </main>
 
 <script>
-  const btn = document.getElementById("copy");
   const url = document.getElementById("url").textContent.trim();
 
-  btn.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      // Older browsers, and any context the async clipboard API is blocked in.
-      const ta = document.createElement("textarea");
-      ta.value = url;
-      ta.setAttribute("readonly", "");
-      ta.style.cssText = "position:fixed;top:-9999px";
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand("copy"); } catch {}
-      ta.remove();
+  // Synchronous fallback for browsers without the async Clipboard API, and for
+  // any context that blocks it. iOS needs setSelectionRange -- select() alone
+  // does not select the text in a textarea there.
+  function legacyCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;top:-9999px;opacity:0";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch { ok = false; }
+    ta.remove();
+    return ok;
+  }
+
+  // Returns a promise, but MUST be called synchronously from within the click
+  // handler: both the async API and execCommand require the user gesture that
+  // is still active at call time, not after an await.
+  function copyUrl() {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(url).then(() => true).catch(() => legacyCopy(url));
     }
-    btn.textContent = "Copied";
-    btn.dataset.done = "1";
-    setTimeout(() => { btn.textContent = "Copy"; delete btn.dataset.done; }, 1800);
+    return Promise.resolve(legacyCopy(url));
+  }
+
+  // --- Copy button -------------------------------------------------------
+  const btn = document.getElementById("copy");
+  btn.addEventListener("click", () => {
+    copyUrl().then(ok => {
+      btn.textContent = ok ? "Copied" : "Press \u2318C";
+      if (ok) btn.dataset.done = "1";
+      setTimeout(() => { btn.textContent = "Copy"; delete btn.dataset.done; }, 1800);
+    });
+  });
+
+  // --- Android: copy, then let the link open Google Calendar -------------
+  // The <a> navigates natively, so nothing here needs to (or should) call
+  // window.open. The copy is kicked off first, inside the gesture; the new tab
+  // takes focus afterwards, by which point the write has already been issued.
+  const android = document.getElementById("android");
+  const androidHint = document.getElementById("android-hint");
+  const hintDefault = androidHint.textContent;
+
+  android.addEventListener("click", () => {
+    copyUrl().then(ok => {
+      androidHint.textContent = ok
+        ? "Link copied \u2014 paste it into Google Calendar."
+        : "Couldn\u2019t copy automatically \u2014 use the Copy button below.";
+      setTimeout(() => { androidHint.textContent = hintDefault; }, 6000);
+    });
   });
 </script>
 
