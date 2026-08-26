@@ -190,21 +190,41 @@
   .apps li + li { margin-top: 5px; }
   .apps b { color: #d4d4e0; font-weight: 500; }
 
-  .lead { margin: 0; font-size: 13px; color: var(--muted); text-align: left; }
+  .lead { margin: 12px 0 0; font-size: 13px; color: var(--muted); text-align: left; }
 
   .warn { margin: 9px 0 0; font-size: 12px; color: #b9a48d; text-align: left; }
 
-  .or {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 18px 0 12px;
+  .camp {
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .camp-label {
+    margin: 0;
     color: var(--muted);
     font-size: 11.5px;
     text-transform: uppercase;
     letter-spacing: .1em;
   }
-  .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  /* Reads as a blank waiting to be filled, not as a real address. */
+  .camp-addr {
+    display: inline-block;
+    margin: 8px 0 0;
+    padding: 5px 14px;
+    border: 1px dashed rgba(255,255,255,.2);
+    border-radius: 8px;
+    color: #7f7f8d;
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  .map { display: block; width: 100%; max-width: 250px; height: auto; margin: 14px auto 0; }
+  .map .marker { fill: #fff; stroke: var(--bg); stroke-width: 1.5; }
+  /* The UA stylesheet's [hidden] rule is scoped to the HTML namespace, so an
+     SVG child with the attribute still paints. Hide it explicitly. */
+  .map [hidden] { display: none; }
 
   .url-row {
     display: flex;
@@ -244,9 +264,6 @@
   }
   #copy:hover { background: rgba(255,255,255,.11); }
   #copy[data-done="1"] { background: rgba(20,184,166,.18); color: var(--teal); border-color: rgba(20,184,166,.4); }
-
-  .instructions { margin: 12px 0 0; font-size: 13px; color: var(--muted); text-align: left; }
-  .instructions b { color: #d4d4e0; font-weight: 500; }
 
   .foot { margin: 9px 0 0; font-size: 11.5px; line-height: 1.5; color: #82828f; }
   .foot b { color: #a0a0b0; font-weight: 500; }
@@ -307,7 +324,6 @@
   <div id="paths">
     <section class="path is-primary" id="path-apple">
       <a class="btn" href="webcal://raw.githubusercontent.com/elbalderas/burningcal/refs/heads/main/calendar.ics">Add to Calendar</a>
-      <p class="hint">iPhone, iPad or Mac — opens your calendar app.</p>
     </section>
 
     <!-- Android has no webcal:// handler, and the Google Calendar app cannot add
@@ -333,7 +349,11 @@
     </section>
 
     <section class="path" id="path-other">
-      <p class="lead">Copy the link below, then add it as a subscription:</p>
+      <div class="url-row">
+        <code id="url">https://raw.githubusercontent.com/elbalderas/burningcal/refs/heads/main/calendar.ics</code>
+        <button id="copy" type="button" aria-live="polite">Copy</button>
+      </div>
+      <p class="lead">Paste it into any app that supports calendar subscriptions:</p>
       <ul class="apps">
         <li><b>Google Calendar</b> — Other calendars → + → From URL</li>
         <li><b>Outlook</b> — Add calendar → Subscribe from web</li>
@@ -347,14 +367,42 @@
   <button class="toggle" id="toggle" type="button" aria-expanded="false" aria-controls="alts" hidden></button>
   <div class="alts" id="alts" hidden></div>
 
-  <div class="or">or</div>
+  <!-- Camp location. Placeholder until the address is known: replace the text
+       in #camp-address, and mark the spot by giving #camp-marker cx/cy and
+       removing its hidden attribute. Position for a clock hour H and radius R
+       (Esplanade is 38, outermost street 87, centre is 100,94):
+         cx = 100 + R * sin(H / 12 * 2PI)
+         cy =  94 - R * cos(H / 12 * 2PI)
+       e.g. 7:30 & Esplanade -> cx 73.1, cy 108.5 -->
+  <section class="camp">
+    <p class="camp-label">Come visit @</p>
+    <p class="camp-addr" id="camp-address">address coming soon</p>
 
-  <div class="url-row">
-    <code id="url">https://raw.githubusercontent.com/elbalderas/burningcal/refs/heads/main/calendar.ics</code>
-    <button id="copy" type="button" aria-live="polite">Copy</button>
-  </div>
-
-  <p class="instructions">Works in any app that supports calendar subscriptions.</p>
+    <svg class="map" viewBox="0 0 200 190" role="img" aria-label="Black Rock City map">
+      <defs>
+        <linearGradient id="gmap" gradientUnits="userSpaceOnUse" x1="20" y1="20" x2="180" y2="170">
+          <stop offset="0%"   stop-color="#8B5CF6"/>
+          <stop offset="55%"  stop-color="#3B82F6"/>
+          <stop offset="100%" stop-color="#14B8A6"/>
+        </linearGradient>
+      </defs>
+      <g fill="none" stroke="url(#gmap)" stroke-linecap="round">
+        <!-- radial streets, 2:00 through 10:00 -->
+        <path d="M132.9 75L175.3 50.5 M138 94L187 94 M132.9 113L175.3 137.5 M119 126.9L143.5 169.3 M100 132L100 181 M81 126.9L56.5 169.3 M67.1 113L24.7 137.5 M62 94L13 94 M67.1 75L24.7 50.5" stroke-width="1" opacity=".3"/>
+        <!-- concentric streets, Esplanade outward -->
+        <path d="M132.9 75A38 38 0 1 1 67.1 75 M140.7 70.5A47 47 0 1 1 59.3 70.5 M147.6 66.5A55 55 0 1 1 52.4 66.5 M153.7 63A62 62 0 1 1 46.3 63 M158.9 60A68 68 0 1 1 41.1 60 M164.1 57A74 74 0 1 1 35.9 57 M169.3 54A80 80 0 1 1 30.7 54" stroke-width="1.1" opacity=".45"/>
+        <!-- city outline -->
+        <path d="M175.3 50.5A87 87 0 1 1 24.7 50.5" stroke-width="1.8" opacity=".9"/>
+        <path d="M132.9 75L175.3 50.5 M67.1 75L24.7 50.5" stroke-width="1.8" opacity=".9"/>
+      </g>
+      <!-- the Man, at centre -->
+      <circle cx="100" cy="94" r="3.4" fill="url(#gmap)"/>
+      <circle cx="100" cy="94" r="7" fill="none" stroke="url(#gmap)" stroke-width="1" opacity=".5"/>
+      <!-- the Temple, out at 12:00 -->
+      <circle cx="100" cy="48" r="2.2" fill="url(#gmap)" opacity=".75"/>
+      <circle id="camp-marker" class="marker" hidden cx="100" cy="94" r="4.5"/>
+    </svg>
+  </section>
 
   <p class="note">Subscribed calendars auto-refresh on their own schedule — usually a few hours, not instantly.</p>
 </main>
@@ -417,11 +465,7 @@
   // only so the classification is honest and the labels can differ.
   const PATH_FOR = { ios: "apple", ipados: "apple", macos: "apple",
                      android: "android", other: "other" };
-  const TOGGLE_LABEL = {
-    apple:   "Not on an Apple device? Other ways to subscribe",
-    android: "Not on Android? Other ways to subscribe",
-    other:   "On a phone? See the iPhone and Android options",
-  };
+  const TOGGLE_LABEL = "Other ways to subscribe";
 
   const os = detectOS();
   const pathKey = PATH_FOR[os] || "other";
@@ -436,22 +480,34 @@
   // Progressive enhancement: the markup ships with every path visible, and JS
   // only demotes the ones that do not apply. If any of this throws, the page
   // is left exactly as served -- all three options on screen and usable.
+  function setAlts(open) {
+    if (!alts || !toggle) return;
+    alts.hidden = !open;
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.textContent = open ? "Hide other options" : TOGGLE_LABEL;
+  }
+
+  // Reveal the alternates and bring them into view. Called when a copy fails:
+  // the copy field lives in the generic path, so on Android it may be folded
+  // away at the exact moment it is needed as the fallback.
+  function revealAlts() {
+    if (!alts || alts.hidden === false) return;
+    setAlts(true);
+    alts.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
   if (chosen && paths && alts && toggle) {
     paths.querySelectorAll(".path").forEach(section => {
       section.classList.toggle("is-primary", section === chosen);
       if (section !== chosen) alts.appendChild(section);
     });
 
-    alts.hidden = true;
-    toggle.textContent = TOGGLE_LABEL[pathKey];
+    // Always starts closed. The copy field lives inside the generic path, which
+    // is itself the primary on desktop, so it is already on screen there --
+    // opening the alternates as well would only lengthen the page.
+    setAlts(false);
     toggle.hidden = false;
-
-    toggle.addEventListener("click", () => {
-      const open = alts.hidden;
-      alts.hidden = !open;
-      toggle.setAttribute("aria-expanded", String(open));
-      toggle.textContent = open ? "Hide other options" : TOGGLE_LABEL[pathKey];
-    });
+    toggle.addEventListener("click", () => setAlts(alts.hidden));
   }
 
   // ---------------------------------------------------------------- buttons
@@ -473,6 +529,7 @@
 
   android.addEventListener("click", () => {
     copyUrl().then(ok => {
+      if (!ok) revealAlts();
       androidHint.textContent = ok
         ? "Link copied \u2014 paste it into Google Calendar."
         : "Couldn\u2019t copy automatically \u2014 use the Copy button below.";
