@@ -91,25 +91,55 @@
   }
   .btn:active { transform: translateY(0); }
 
-  .btn-primary {
-    background: var(--grad);
-    color: #fff;
-    box-shadow: 0 8px 24px rgba(59,130,246,.32);
-  }
-  .btn-primary:hover { transform: translateY(-1px); filter: brightness(1.07); box-shadow: 0 12px 30px rgba(59,130,246,.42); }
+  .path + .path, .alts { margin-top: 18px; }
+  .alts .path + .path { margin-top: 18px; }
 
-  /* The second path is equally valid, so it reads as a peer of the first --
-     but the gradient stays on one button so the card keeps a single focus. */
-  .btn-android {
-    margin-top: 16px;
+  /* Every path is styled as a peer by default; the detected one is promoted.
+     Without JS nothing is promoted except the Apple path marked in the HTML,
+     so the page still works as a plain list of options. */
+  .path .btn {
     background: rgba(255,255,255,.05);
     border: 1px solid rgba(255,255,255,.16);
     color: var(--text);
-    /* 14px, not the primary's 16: it keeps the longest sensible label on one
-       line at 375px, and the step down reads as secondary without hiding it. */
     font-size: 14px;
   }
-  .btn-android:hover { transform: translateY(-1px); background: rgba(255,255,255,.09); }
+  .path .btn:hover { transform: translateY(-1px); background: rgba(255,255,255,.09); }
+
+  .path.is-primary .btn {
+    background: var(--grad);
+    border-color: transparent;
+    color: #fff;
+    font-size: 16px;
+    box-shadow: 0 8px 24px rgba(59,130,246,.32);
+  }
+  .path.is-primary .btn:hover { filter: brightness(1.07); box-shadow: 0 12px 30px rgba(59,130,246,.42); }
+
+  /* Longest label on the page: 14px is what keeps it on one line at 375px,
+     so it stays 14 even when promoted. Id beats the .path.is-primary rule. */
+  #android { font-size: 14px; }
+
+  .toggle {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    padding: 9px;
+    border: 0;
+    border-radius: 9px;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(255,255,255,.22);
+  }
+  .toggle:hover { color: var(--text); }
+
+  /* Author-level display wins over the UA stylesheet's [hidden] rule regardless
+     of specificity, so display:block above would leave a dead toggle on screen
+     whenever JS never runs. Restore the attribute's meaning explicitly. */
+  .toggle[hidden], .alts[hidden] { display: none; }
 
   .hint { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); }
 
@@ -146,6 +176,21 @@
     font-variant-numeric: tabular-nums;
   }
   .steps b { color: #d4d4e0; font-weight: 500; }
+
+  /* Not a sequence -- three independent apps -- so no numbering. */
+  .apps {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  .apps li + li { margin-top: 5px; }
+  .apps b { color: #d4d4e0; font-weight: 500; }
+
+  .lead { margin: 0; font-size: 13px; color: var(--muted); text-align: left; }
 
   .warn { margin: 9px 0 0; font-size: 12px; color: #b9a48d; text-align: left; }
 
@@ -259,25 +304,48 @@
   <h1>Burning Man</h1>
   <p class="tagline">Sets and events on playa. Times are Pacific.</p>
 
-  <a class="btn btn-primary" href="webcal://raw.githubusercontent.com/elbalderas/burningcal/refs/heads/main/calendar.ics">Add to Calendar</a>
-  <p class="hint">iPhone, iPad or Mac — opens your calendar app.</p>
+  <div id="paths">
+    <section class="path is-primary" id="path-apple">
+      <a class="btn" href="webcal://raw.githubusercontent.com/elbalderas/burningcal/refs/heads/main/calendar.ics">Add to Calendar</a>
+      <p class="hint">iPhone, iPad or Mac — opens your calendar app.</p>
+    </section>
 
-  <!-- Android has no webcal:// handler, and the Google Calendar app cannot add a
-       calendar by URL at all -- only the web version can. A real link with
-       target=_blank rather than window.open(): the clipboard write below is
-       async, so opening the tab after awaiting it would fall outside the user
-       gesture and be caught by the popup blocker. -->
-  <a class="btn btn-android" id="android"
-     href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer">
-    Copy &amp; open Google Calendar
-  </a>
-  <p class="hint" id="android-hint" aria-live="polite">Android — the Google Calendar app can’t add a calendar by URL, so this opens the web version.</p>
+    <!-- Android has no webcal:// handler, and the Google Calendar app cannot add
+         a calendar by URL at all -- only the web version can. A real link with
+         target=_blank rather than window.open(): the clipboard write is async,
+         so opening the tab after awaiting it would fall outside the user
+         gesture and be caught by the popup blocker. -->
+    <section class="path" id="path-android">
+      <a class="btn" id="android"
+         href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer">
+        Copy &amp; open Google Calendar
+      </a>
+      <p class="hint" id="android-hint" aria-live="polite">Android — the Google Calendar app can’t add a calendar by URL, so this opens the web version.</p>
+      <!-- Each li is a flex row (number + text). The text must sit in ONE span:
+           bare text runs between <b> tags would each become their own anonymous
+           flex item, picking up the row gap and breaking mid-phrase. -->
+      <ol class="steps">
+        <li><span><b>Other calendars</b> → <b>+</b> → <b>From URL</b></span></li>
+        <li><span>Paste the link (already copied) → <b>Add calendar</b></span></li>
+      </ol>
+      <p class="warn">Google Calendar can take up to 24 hours to show updates.</p>
+      <p class="foot">Want updates sooner? <b>ICSx⁵</b> subscribes to webcal:// links directly, but it is a separate app to install.</p>
+    </section>
 
-  <ol class="steps">
-    <li><b>Other calendars</b> → <b>+</b> → <b>From URL</b></li>
-    <li>Paste the link (already copied) → <b>Add calendar</b></li>
-  </ol>
-  <p class="warn">Google Calendar can take up to 24 hours to show updates.</p>
+    <section class="path" id="path-other">
+      <p class="lead">Copy the link below, then add it as a subscription:</p>
+      <ul class="apps">
+        <li><b>Google Calendar</b> — Other calendars → + → From URL</li>
+        <li><b>Outlook</b> — Add calendar → Subscribe from web</li>
+        <li><b>Apple Calendar</b> — File → New Calendar Subscription</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- Populated by JS with whichever paths were not detected. Empty and
+       unused without JS, when all three stay visible above. -->
+  <button class="toggle" id="toggle" type="button" aria-expanded="false" aria-controls="alts" hidden></button>
+  <div class="alts" id="alts" hidden></div>
 
   <div class="or">or</div>
 
@@ -286,15 +354,15 @@
     <button id="copy" type="button" aria-live="polite">Copy</button>
   </div>
 
-  <p class="instructions">Any other calendar app: add a calendar <b>by URL</b> and paste this.</p>
+  <p class="instructions">Works in any app that supports calendar subscriptions.</p>
 
   <p class="note">Subscribed calendars auto-refresh on their own schedule — usually a few hours, not instantly.</p>
-  <p class="foot">On Android and want updates sooner? <b>ICSx⁵</b> subscribes to webcal:// links directly, but it is a separate app to install.</p>
 </main>
 
 <script>
   const url = document.getElementById("url").textContent.trim();
 
+  // ---------------------------------------------------------------- clipboard
   // Synchronous fallback for browsers without the async Clipboard API, and for
   // any context that blocks it. iOS needs setSelectionRange -- select() alone
   // does not select the text in a textarea there.
@@ -322,7 +390,71 @@
     return Promise.resolve(legacyCopy(url));
   }
 
-  // --- Copy button -------------------------------------------------------
+  // ---------------------------------------------------------------- detection
+  // Runs entirely in the browser; nothing is sent anywhere.
+  function detectOS() {
+    try {
+      const ua = navigator.userAgent || "";
+      const platform = navigator.platform || "";
+      const touch = navigator.maxTouchPoints || 0;
+
+      // iPadOS 13+ in desktop mode sends a Macintosh UA and reports MacIntel,
+      // so the UA alone cannot separate it from a real Mac. Touch points can:
+      // Macs report 0. Checked first, because the Mac branch would swallow it.
+      if (platform === "MacIntel" && touch > 1) return "ipados";
+
+      if (/iPhone|iPod/.test(ua)) return "ios";
+      if (/iPad/.test(ua)) return "ipados";
+      if (/Android/.test(ua)) return "android";
+      if (/Macintosh|Mac OS X/.test(ua)) return "macos";
+      return "other";
+    } catch {
+      return "other";   // never let detection failure become a dead end
+    }
+  }
+
+  // Apple platforms all share the webcal:// path; they are detected separately
+  // only so the classification is honest and the labels can differ.
+  const PATH_FOR = { ios: "apple", ipados: "apple", macos: "apple",
+                     android: "android", other: "other" };
+  const TOGGLE_LABEL = {
+    apple:   "Not on an Apple device? Other ways to subscribe",
+    android: "Not on Android? Other ways to subscribe",
+    other:   "On a phone? See the iPhone and Android options",
+  };
+
+  const os = detectOS();
+  const pathKey = PATH_FOR[os] || "other";
+  document.documentElement.dataset.os = os;
+  document.documentElement.dataset.path = pathKey;
+
+  const paths  = document.getElementById("paths");
+  const alts   = document.getElementById("alts");
+  const toggle = document.getElementById("toggle");
+  const chosen = document.getElementById("path-" + pathKey);
+
+  // Progressive enhancement: the markup ships with every path visible, and JS
+  // only demotes the ones that do not apply. If any of this throws, the page
+  // is left exactly as served -- all three options on screen and usable.
+  if (chosen && paths && alts && toggle) {
+    paths.querySelectorAll(".path").forEach(section => {
+      section.classList.toggle("is-primary", section === chosen);
+      if (section !== chosen) alts.appendChild(section);
+    });
+
+    alts.hidden = true;
+    toggle.textContent = TOGGLE_LABEL[pathKey];
+    toggle.hidden = false;
+
+    toggle.addEventListener("click", () => {
+      const open = alts.hidden;
+      alts.hidden = !open;
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.textContent = open ? "Hide other options" : TOGGLE_LABEL[pathKey];
+    });
+  }
+
+  // ---------------------------------------------------------------- buttons
   const btn = document.getElementById("copy");
   btn.addEventListener("click", () => {
     copyUrl().then(ok => {
@@ -332,10 +464,9 @@
     });
   });
 
-  // --- Android: copy, then let the link open Google Calendar -------------
-  // The <a> navigates natively, so nothing here needs to (or should) call
-  // window.open. The copy is kicked off first, inside the gesture; the new tab
-  // takes focus afterwards, by which point the write has already been issued.
+  // The <a> navigates natively, so nothing here calls window.open. The copy is
+  // kicked off first, inside the gesture; the new tab takes focus afterwards,
+  // by which point the write has already been issued.
   const android = document.getElementById("android");
   const androidHint = document.getElementById("android-hint");
   const hintDefault = androidHint.textContent;
