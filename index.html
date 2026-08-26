@@ -28,6 +28,12 @@
     margin: 0;
     min-height: 100svh;
     display: grid;
+    /* Explicit, clamped track. An implicit `auto` column sizes to max-content,
+       and the un-breakable URL below made it ~744px wide on a 390px phone --
+       so the card's `100%` resolved against that, not the screen, and centred
+       itself off the right edge. minmax(0, 1fr) keeps the column at the
+       viewport width no matter how wide its contents want to be. */
+    grid-template-columns: minmax(0, 1fr);
     place-items: center;
     padding: 24px;
     background: var(--bg);
@@ -51,7 +57,8 @@
   }
 
   .card {
-    width: min(100%, 440px);
+    width: 100%;
+    max-width: 440px;
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 24px;
