@@ -282,9 +282,21 @@
     outline-offset: 3px;
   }
 
-  @media (max-width: 420px) {
-    .card { padding: 28px 20px 22px; border-radius: 20px; }
-    h1 { font-size: 24px; }
+  /* Phones. 430px catches the widest current iPhone. Safari's *visible*
+     viewport with both toolbars out is far shorter than the screen -- 659px
+     on a 390x844 iPhone 13, 553px on an SE -- so the vertical rhythm tightens
+     here to keep the subscribe block above the fold. Widths are stable in a
+     media query; heights are not, since Safari resolves height queries
+     against the expanded viewport. */
+  @media (max-width: 430px) {
+    body { padding: 18px; }
+    .card { padding: 26px 20px 20px; border-radius: 20px; }
+    .mark { width: 32px; height: 49.5px; margin-bottom: 14px; }
+    h1 { font-size: 24px; line-height: 1.25; }
+    .tagline { margin-bottom: 18px; font-size: 14px; }
+    .note { margin-top: 16px; padding-top: 13px; }
+    .camp { margin-top: 18px; padding-top: 16px; }
+    .map { max-width: 200px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -367,6 +379,8 @@
   <button class="toggle" id="toggle" type="button" aria-expanded="false" aria-controls="alts" hidden></button>
   <div class="alts" id="alts" hidden></div>
 
+  <p class="note">Subscribed calendars auto-refresh on their own schedule — usually a few hours, not instantly.</p>
+
   <!-- Camp location. Placeholder until the address is known: replace the text
        in #camp-address, and mark the spot by giving #camp-marker cx/cy and
        removing its hidden attribute. Position for a clock hour H and radius R
@@ -404,7 +418,6 @@
     </svg>
   </section>
 
-  <p class="note">Subscribed calendars auto-refresh on their own schedule — usually a few hours, not instantly.</p>
 </main>
 
 <script>
